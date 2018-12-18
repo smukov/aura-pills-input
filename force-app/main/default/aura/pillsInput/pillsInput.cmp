@@ -1,0 +1,137 @@
+<aura:component>
+
+  <ltng:require scripts="{!join(',', $Resource.LEX_JS + '/util.js', $Resource.LEX_JS + '/regex.js')}" 
+    afterScriptsLoaded="{!c.onScriptsLoaded}" />
+
+  <!-- 
+    Public Attributes 
+  -->
+
+  <!-- Standard stuff -->
+  <aura:attribute name="label" type="String" required="true" 
+    description="Input Label" />
+
+  <aura:attribute name="placeholderText" type="String"
+    description="Placeholder text" />
+
+  <aura:attribute name="name" type="String" required="true" 
+    description="Unique component name" />
+
+  <aura:attribute name="value" type="String" required="true" 
+    description="Bindable value" />
+
+  <aura:attribute name="helpText" type="String" default="" 
+    description="Help Text message" />
+
+  <!-- input delimiters -->
+  <aura:attribute name="delimiter" type="String" default=" " 
+    description="The character used to split the input" />
+
+  <aura:attribute name="delimiterInDatabase" type="String" default=";" 
+    description="Character used to split the input for database storage (or any other storage)" />
+    
+  <!-- input validation -->
+  <aura:attribute name="validationTypes" type="String" default="" 
+    description="Input validations to perform (for multiple validations add them as comma separated): emailAddress, ipAddress, weburl, positiveDecimalNumberWithTwoDecimals, positiveInteger, nonEmptyString" />
+  
+  <aura:attribute name="preventInvalidInput" type="Boolean" default="false" 
+    description="Prevent adding a pill that is in invalid format (users will have to press ENTER key to submit a valid input)" />
+
+  <aura:attribute name="errorMessage" type="String" default="Input is invalid" 
+    description="Error message to show when inpu is invalid" />
+
+  <!-- aesthetics -->
+  <aura:attribute name="stackPills" type="Boolean" default="false" 
+    description="Set to TRUE if you want the pills to be stacked, instead of inline" />
+  
+  <aura:attribute name="hidePillsBorder" type="Boolean" default="false" 
+    description="Hide the borders around pills" />
+  
+  
+  <!-- 
+    Private Attributes 
+  -->
+  <aura:attribute name="pills" type="List" default="[]" access="private" />
+  <aura:attribute name="isSriptLoaded" type="Boolean" default="false" access="private" />
+  <aura:attribute name="isValueLoaded" type="Boolean" default="false" access="private" />
+  <aura:attribute name="isInputValid" type="Boolean" default="true" access="private" />
+
+  <!-- 
+    Public Method 
+  -->
+  <aura:method name="reset" action="{!c.onReset}" 
+    description="Use this method to completely re-set the component. Useful when recycling the component without destroying it."/>
+
+  <!-- 
+    Subscribed Events 
+  -->
+  <aura:handler name="init" value="{!this}" action="{!c.onInit}" />
+  <aura:handler name="change" value="{!v.pills}" action="{!c.onPillsChanged}" />
+  <aura:handler name="change" value="{!v.value}" action="{!c.onValueChanged}" />
+  <aura:handler name="change" value="{!v.isInputValid}" action="{!c.onIsInputValidChange}" />
+
+  <!-- 
+    Component Body 
+  -->
+  <div aura:id="divContainer" class="slds-form-element">
+
+    <!-- label -->
+    <label class="slds-form-element__label" for="{!v.name}" style="margin-right: .35rem">
+      {!v.label}
+    </label>
+    
+    <!-- help text -->
+    <aura:if isTrue="{!v.helpText != ''}">
+
+      <lightning:helptext content="{!v.helpText}" />
+
+      <aura:set attribute="else">
+        <span></span>
+      </aura:set>
+
+    </aura:if>
+    
+    <!-- input container -->
+    <div class="slds-form-element__control">
+
+      <input 
+        aura:id="inputText" 
+        type="text" 
+        id="{!v.name}"
+        aria-describedby="error-message" 
+        class="slds-input"
+        placeholder="{!v.placeholderText}" 
+        value="" 
+        onkeyup="{!c.onKeyUpInput}" />
+
+      <div aura:id="divErrorMessage" id="error-message" class="slds-form-element__help slds-hide">
+        {!v.errorMessage}
+      </div>
+      
+      <!-- pills container -->
+      <div id="{!'listbox-selections-' + v.name}" role="listbox" aria-orientation="horizontal">
+
+        <ul aura:id="ulPills" class="slds-listbox slds-listbox_inline slds-p-top_xxx-small" role="group" aria-label="Inputted Options:">
+          
+          <aura:iteration items="{!v.pills}" var="pill">
+
+            <li role="presentation" class="slds-listbox__item">
+              
+              <lightning:pill 
+                name="{!pill.id}" 
+                label="{!pill.label}" 
+                hasError="{!!pill.isValid}" 
+                onclick="{!c.onClickPill}"
+                onremove="{!c.onRemovePill}" />
+
+            </li>
+
+          </aura:iteration>
+          
+        </ul>
+
+      </div><!-- / pills container -->
+    </div><!-- / input container -->
+  </div>
+
+</aura:component>

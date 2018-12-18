@@ -1,0 +1,10 @@
+/* Hide border around pills */
+.THIS .hide-pills-border > li > span > span {
+  border: none;
+}
+
+/* Align the helptext button */
+.THIS > lightning-helptext > div {
+  padding-top: 0px;
+  padding-bottom: 2px;
+}
